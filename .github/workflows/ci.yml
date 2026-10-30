@@ -1,29 +1,10 @@
-name: CI
+name: CI (demo fail)
 
 on:
-  push:
-    branches: [main]
-  pull_request:
   workflow_dispatch:
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install
-        run: pip install -r requirements-test.txt
-
-      - name: Pytest (flakes only — skip always-broken + timing)
-        env:
-          PYTHONHASHSEED: "0"
-        run: |
-          pytest -q \
-            --randomly-seed=${{ github.run_id }}${{ github.run_attempt }} \
-            --deselect tests/test_pricing.py::test_tax_standard_rate \
-            --deselect tests/test_reports.py::test_daily_sales_summary_is_fast
+      - run: echo "Simulated flaky pipeline failure" && exit 1
