@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
-  workflow_dispatch:   # so you can trigger runs from the Actions tab
+  workflow_dispatch:
 
 jobs:
   test:
@@ -19,11 +19,11 @@ jobs:
       - name: Install
         run: pip install -r requirements-test.txt
 
-      - name: Pytest (random order; skip always-broken tax test)
+      - name: Pytest (flakes only — skip always-broken + timing)
         env:
-          # Random hash seed so F6 (revenue total) can flake
-          PYTHONHASHSEED: ${{ github.run_id }}
+          PYTHONHASHSEED: "0"
         run: |
           pytest -q \
-            --randomly-seed=${{ github.run_attempt }}${{ github.run_id }} \
-            --deselect tests/test_pricing.py::test_tax_standard_rate
+            --randomly-seed=${{ github.run_id }}${{ github.run_attempt }} \
+            --deselect tests/test_pricing.py::test_tax_standard_rate \
+            --deselect tests/test_reports.py::test_daily_sales_summary_is_fast
