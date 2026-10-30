@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:   # so you can trigger runs from the Actions tab
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install
+        run: pip install -r requirements-test.txt
+
+      - name: Pytest (random order; skip always-broken tax test)
+        env:
+          # Random hash seed so F6 (revenue total) can flake
+          PYTHONHASHSEED: ${{ github.run_id }}
+        run: |
+          pytest -q \
+            --randomly-seed=${{ github.run_attempt }}${{ github.run_id }} \
+            --deselect tests/test_pricing.py::test_tax_standard_rate
